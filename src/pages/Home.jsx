@@ -23,8 +23,19 @@ const Home = () => {
             <div className="home__img-container">
               {apiData.info.map((item, idx) => {
                 return (
-                  <NavLink key={idx} to={`/archive/${item.date}`}>
-                    <img key={idx} src={item.url} alt="" />
+                  <NavLink className={'link'} key={idx} to={`/archive/${item.date}`}>
+                    {item.media_type === "image" ? (
+                      <img key={idx} src={item.url} alt={item.title} />
+                    ) : (
+                      <div className="link-container">
+                        <p className="video-name">
+                          {item.title}
+                        </p>
+                        <button>
+                          watch
+                        </button>
+                      </div>
+                    )}
                   </NavLink>
                 );
               })}

@@ -29,21 +29,50 @@ const MONTHS = [
   "November",
   "December",
 ];
+
 const Archive = () => {
   const [apiData, setApiData] = useState({ info: [], didItFetch: false });
 
   const [date, setDate] = useState({
-    startDate: "2016-1-1",
-    endDate: "2016-2-1",
+    startDate: new Date("2016-1-1"),
+    endDate: new Date("2016-2-1"),
   });
+  const dateFormatter = (dateInput) => {
+    const year = dateInput.getFullYear();
+    const month = dateInput.getMonth() + 1;
+    const day = dateInput.getDate();
+    return `${year}-${month}-${day}`;
+  };
 
+  const handleNavForward = () => {
+    setApiData({ ...apiData, didItFetch: false });
+    setDate({
+      startDate: new Date(date.endDate),
+      endDate: new Date(date.endDate.setMonth(date.endDate.getMonth() + 1)),
+    });
+  };
+
+  const handleNavBackward = () => {
+    setApiData({ ...apiData, didItFetch: false });
+    setDate({
+      startDate: new Date(
+        date.startDate.setMonth(date.startDate.getMonth() - 1)
+      ),
+      endDate: new Date(date.endDate.setMonth(date.endDate.getMonth() - 1)),
+    });
+  };
   useEffect(() => {
-    fetch(`${APOD_URL}&start_date=${date.startDate}&end_date=${date.endDate} `)
+    fetch(
+      `${APOD_URL}&start_date=${dateFormatter(
+        date.startDate
+      )}&end_date=${dateFormatter(date.endDate)} `
+    )
       .then((data) => data.json())
       .then((res) => {
         setApiData({ info: res, didItFetch: true });
       });
   }, [date]);
+
   return (
     <section className="main__archive">
       <div className="main__archive__header">
@@ -80,18 +109,14 @@ const Archive = () => {
       <div className="archive__navigation">
         <span
           className="archive__navigation-arrows"
-          onClick={() => {
-            setDate({ startDate: '2015-12-1', endDate: date.startDate });
-          }}
+          onClick={handleNavBackward}
         >
           &#5130;
         </span>
-        <span
-          className="archive__navigation-arrows"
-          onClick={() => {
-            setDate({ startDate: date.endDate, endDate: "2016-3-1" });
-          }}
-        >
+        <span className="archive__navigation-date-range">
+          {`${dateFormatter(date.startDate)} - ${dateFormatter(date.endDate)}`}
+        </span>
+        <span className="archive__navigation-arrows" onClick={handleNavForward}>
           &#5125;
         </span>
       </div>
