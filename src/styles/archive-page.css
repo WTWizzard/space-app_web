@@ -38,16 +38,16 @@
   font-weight: 300;
   padding: 0px 20px;
 }
-.main__archive__body{
+.main__archive__body {
   height: 100%;
   margin-bottom: 30px;
 }
-.main__archive__body-container{
-  display: grid;
-  grid-template-columns: repeat(4, 350px);
-  justify-items: center;
+.main__archive__body-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
-.archive__navigation{
+.archive__navigation {
   display: flex;
   color: #fff;
   font-size: 30px;
@@ -55,12 +55,19 @@
   align-items: center;
   font-weight: 700;
 }
-.archive__navigation-date-range{
+.archive__navigation-date-range {
   font-weight: 300;
   font-size: 16px;
 }
-.archive__navigation-arrows{
+.archive__navigation-arrows {
   cursor: pointer;
-  transition-duration: .3s;
+  transition-duration: 0.3s;
   padding: 10px;
+}
+
+@media (max-width: 1440px) {
+  .main__archive {
+    max-width: 1200px;
+    padding: 30px 10px;
+  }
 }

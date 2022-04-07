@@ -9,7 +9,7 @@ const Select = ({ data, name, onSelect }) => {
 
   return (
     <select name={name} id={`${name}_id`} onChange={handleChange}>
-      <option value="" defaultValue disabled>
+      <option value="" selected disabled>
         {`Choose ${name}`}
       </option>
       {data.map((item, idx) => {
