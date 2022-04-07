@@ -3,6 +3,8 @@ import ArchiveCard from "../components/ArchiveCard/ArchiveCard";
 import Select from "../components/Select";
 import { APOD_URL } from "../constants";
 import "../styles/archive-page.css";
+import LoadingCircle from "../components/loadingCircle/loadingCircle";
+import ArchiveNav from "../components/archiveNav/ArchiveNav";
 
 const YEARS = [
   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
@@ -16,18 +18,18 @@ const DAYS = [
 ];
 
 const MONTHS = [
-  "January",
-  "Ferbuary",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  { name: "January", value: 1 },
+  { name: "Ferbuary", value: 2 },
+  { name: "March", value: 3 },
+  { name: "April", value: 4 },
+  { name: "May", value: 5 },
+  { name: "June", value: 6 },
+  { name: "July", value: 7 },
+  { name: "August", value: 8 },
+  { name: "September", value: 9 },
+  { name: "October", value: 10 },
+  { name: "November", value: 11 },
+  { name: "December", value: 12 },
 ];
 
 const Archive = () => {
@@ -37,6 +39,15 @@ const Archive = () => {
     startDate: new Date("2016-1-1"),
     endDate: new Date("2016-2-1"),
   });
+
+  const [selected, setSelected] = useState({
+    year: "",
+    month: "",
+    day: "",
+  });
+
+  const [search, setSearch] = useState(false);
+
   const dateFormatter = (dateInput) => {
     const year = dateInput.getFullYear();
     const month = dateInput.getMonth() + 1;
@@ -44,23 +55,26 @@ const Archive = () => {
     return `${year}-${month}-${day}`;
   };
 
-  const handleNavForward = () => {
-    setApiData({ ...apiData, didItFetch: false });
-    setDate({
-      startDate: new Date(date.endDate),
-      endDate: new Date(date.endDate.setMonth(date.endDate.getMonth() + 1)),
-    });
+  const handleSelect = (name, value) => {
+    setSelected({ ...selected, [name]: value });
   };
 
-  const handleNavBackward = () => {
-    setApiData({ ...apiData, didItFetch: false });
-    setDate({
-      startDate: new Date(
-        date.startDate.setMonth(date.startDate.getMonth() - 1)
-      ),
-      endDate: new Date(date.endDate.setMonth(date.endDate.getMonth() - 1)),
-    });
-  };
+  const handleSearch = () => setSearch(true);
+
+  useEffect(() => {
+    if (search) {
+      fetch(
+        `${APOD_URL}&date=${
+          selected.year + "-" + selected.month + "-" + selected.day
+        }`
+      )
+        .then((data) => data.json())
+        .then((res) => {
+          setApiData({ info: res, didItFetch: true });
+        });
+    }
+  }, [search, selected]);
+
   useEffect(() => {
     fetch(
       `${APOD_URL}&start_date=${dateFormatter(
@@ -71,6 +85,7 @@ const Archive = () => {
       .then((res) => {
         setApiData({ info: res, didItFetch: true });
       });
+    setSearch(false);
   }, [date]);
 
   return (
@@ -82,44 +97,40 @@ const Archive = () => {
             the range of search is limited (1995 jun 20 - present)
           </p>
           <div className="archive__searchByDate-selects">
-            <Select data={YEARS} name={"years"} />
-            <Select data={MONTHS} name={"month"} />
-            <Select data={DAYS} name={"day"} />
+            <Select data={YEARS} onSelect={handleSelect} name={"year"} />
+            <Select data={MONTHS} onSelect={handleSelect} name={"month"} />
+            <Select data={DAYS} onSelect={handleSelect} name={"day"} />
+            <button
+              className="archive__searchByDate-btn"
+              onClick={handleSearch}
+            >
+              search
+            </button>
           </div>
         </div>
       </div>
       <div className="main__archive__body">
         {apiData.didItFetch ? (
           <div className="main__archive__body-container">
-            {apiData.info.map((item, idx) => {
-              return <ArchiveCard key={idx} data={item} />;
-            })}
+            {!search ? (
+              apiData.info.map((item, idx) => {
+                return <ArchiveCard key={idx} data={item} />;
+              })
+            ) : (
+              <ArchiveCard data={apiData.info} />
+            )}
           </div>
         ) : (
-          <div className="loading-circle">
-            <div className="lds-ring">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          </div>
+          <LoadingCircle />
         )}
       </div>
-      <div className="archive__navigation">
-        <span
-          className="archive__navigation-arrows"
-          onClick={handleNavBackward}
-        >
-          &#5130;
-        </span>
-        <span className="archive__navigation-date-range">
-          {`${dateFormatter(date.startDate)} - ${dateFormatter(date.endDate)}`}
-        </span>
-        <span className="archive__navigation-arrows" onClick={handleNavForward}>
-          &#5125;
-        </span>
-      </div>
+      <ArchiveNav
+        formatter={dateFormatter}
+        dateState={date}
+        dateSetter={setDate}
+        apiState={apiData}
+        apiSetter={setApiData}
+      />
     </section>
   );
 };
